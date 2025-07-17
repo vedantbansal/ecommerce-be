@@ -1,0 +1,36 @@
+# Java build artifacts
+target/
+*.class
+
+# Maven
+log/
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+
+# Ignore local Maven repo if accidentally added
+.m2/
+
+# IntelliJ IDEA
+.idea/
+*.iml
+*.ipr
+*.iws
+out/
+
+# VS Code
+.vscode/
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# IDE crash reports and temporary files
+hs_err_pid*
+*.swp
+
+# Ignore help file if not customized
+HELP.md

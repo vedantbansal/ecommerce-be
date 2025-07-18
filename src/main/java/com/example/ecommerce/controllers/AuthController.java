@@ -31,11 +31,23 @@ import java.util.*;
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
-    private AuthenticationManager authenticationManager;
-    private JWTUtils jwtUtils;
-    private UserRepository userRepository;
-    private PasswordEncoder passwordEncoder;
-    private RoleRepository roleRepository;
+    private final AuthenticationManager authenticationManager;
+    private final JWTUtils jwtUtils;
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final RoleRepository roleRepository;
+
+    public AuthController(AuthenticationManager authenticationManager,
+                          JWTUtils jwtUtils,
+                          UserRepository userRepository,
+                          PasswordEncoder passwordEncoder,
+                          RoleRepository roleRepository) {
+        this.authenticationManager = authenticationManager;
+        this.jwtUtils = jwtUtils;
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.roleRepository = roleRepository;
+    }
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest){

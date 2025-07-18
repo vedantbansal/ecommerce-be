@@ -17,11 +17,13 @@ import java.util.List;
 @RequestMapping("/api/carts")
 public class CartController {
 
-    @Autowired
     CartService cartService;
-
-    @Autowired
     CartMapper cartMapper;
+
+    public CartController(CartService cartService, CartMapper cartMapper) {
+        this.cartService = cartService;
+        this.cartMapper = cartMapper;
+    }
 
     @PostMapping("/products/{productId}/quantity/{quantity}")
     public ResponseEntity<CartDTO> addProductToCart(@PathVariable Long productId, @PathVariable Integer quantity){

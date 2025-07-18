@@ -15,8 +15,11 @@ import org.springframework.web.multipart.MultipartFile;
 @RequestMapping("/api")
 public class ProductController {
 
-    @Autowired
-    private ProductService productService;
+    private final ProductService productService;
+
+    public ProductController(ProductService productService) {
+        this.productService = productService;
+    }
 
     @PreAuthorize("hasRole('merchant')")
     @PostMapping("/merchant/categories/{categoryId}/product")

@@ -38,7 +38,7 @@ public class Address {
     private String country;
 
     @NotBlank
-    @Size(min=5, message = "Street must be least 5 characters")
+    @Size(min=5, message = "Pincode must be least 5 characters")
     private String pincode;
 
     @ManyToOne

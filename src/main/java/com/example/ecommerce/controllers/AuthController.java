@@ -31,20 +31,11 @@ import java.util.*;
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
-    @Autowired
-    AuthenticationManager authenticationManager;
-
-    @Autowired
+    private AuthenticationManager authenticationManager;
     private JWTUtils jwtUtils;
-
-    @Autowired
     private UserRepository userRepository;
-
-    @Autowired
-    PasswordEncoder passwordEncoder;
-
-    @Autowired
-    RoleRepository roleRepository;
+    private PasswordEncoder passwordEncoder;
+    private RoleRepository roleRepository;
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest){

@@ -41,7 +41,7 @@ public class CartServiceImpl implements CartService{
 
     @Override
     @Transactional
-    public ResponseEntity<CartDTO> addProductToCart(Long productId, Integer quantity) {
+    public CartDTO addProductToCart(Long productId, Integer quantity) {
         if(quantity <= 0){
             throw new ApiException("Quantity in invalid for product " + productId);
         }
@@ -59,20 +59,16 @@ public class CartServiceImpl implements CartService{
         if(product.getQuantity() < quantity){
             throw new ApiException("Only " + product.getQuantity() + " items left in stock for item " + product.getProductName());
         }
-        List<CartItem> cartItemList = cart.getCartItems();
         cart.getCartItems().add(cartItem);
         cart.setTotalPrice(cart.getTotalPrice() + product.getSpecialPrice() * quantity);
-
         Cart savedCart = cartRepository.save(cart);
-        CartDTO cartDTO = cartMapper.toCartDTO(savedCart);
-
-        return ResponseEntity.ok(cartDTO);
+        return cartMapper.toCartDTO(savedCart);
     }
 
     @Override
-    public ResponseEntity<List<CartDTO>> getAllCarts() {
+    public List<CartDTO> getAllCarts() {
         List<Cart> carts = cartRepository.findAll();
-        return ResponseEntity.ok(carts.stream().map(item -> cartMapper.toCartDTO(item)).toList());
+        return carts.stream().map(cartMapper::toCartDTO).toList();
     }
 
     @Override
@@ -85,13 +81,12 @@ public class CartServiceImpl implements CartService{
                 });
     }
 
-    @Transactional
     @Override
-    public ResponseEntity<CartDTO> updateCartProductQuantity(Long cartItemId, Integer quantity) {
+    @Transactional
+    public CartDTO updateCartProductQuantity(Long cartItemId, Integer quantity) {
         Cart cart = getOrCreateCart();
         CartItem cartItem = cartItemRepository.findByIdAndCartId(cartItemId, cart.getCartId())
                 .orElseThrow(() -> new ApiException("Cart Item not found with Id: " + cartItemId));
-
         Integer newQuantity = cartItem.getQuantity() + quantity;
         if(newQuantity == 0){
             cart.getCartItems().removeIf(item -> Objects.equals(item.getCartItemId(), cartItemId));
@@ -104,21 +99,19 @@ public class CartServiceImpl implements CartService{
         }
         cart.setTotalPrice(cart.getTotalPrice() + quantity * cartItem.getProduct().getSpecialPrice());
         Cart updatedCart = cartRepository.save(cart);
-        CartDTO cartDTO = cartMapper.toCartDTO(updatedCart);
-        return ResponseEntity.ok(cartDTO);
+        return cartMapper.toCartDTO(updatedCart);
     }
 
-    @Transactional
     @Override
-    public ResponseEntity<CartDTO> deleteCartItem(Long cartItemId) {
+    @Transactional
+    public CartDTO deleteCartItem(Long cartItemId) {
         Cart cart = getOrCreateCart();
         CartItem cartItem = cartItemRepository.findByIdAndCartId(cartItemId, cart.getCartId())
                 .orElseThrow(() -> new ResourceNotFoundException("CartItem", "CartItemId", cartItemId));
         cart.getCartItems().removeIf(item -> Objects.equals(item.getCartItemId(), cartItemId));
         cart.setTotalPrice(cart.getTotalPrice() - cartItem.getQuantity() * cartItem.getProduct().getSpecialPrice());
         Cart savedCart = cartRepository.save(cart);
-        CartDTO cartDTO = cartMapper.toCartDTO(savedCart);
-        return ResponseEntity.ok(cartDTO);
+        return cartMapper.toCartDTO(savedCart);
     }
 
 

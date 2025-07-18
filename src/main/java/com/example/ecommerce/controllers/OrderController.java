@@ -5,7 +5,6 @@ import com.example.ecommerce.Util.AuthUtils;
 import com.example.ecommerce.payload.OrderDTO;
 import com.example.ecommerce.payload.OrderRequestDTO;
 import com.example.ecommerce.service.OrderService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -25,7 +24,6 @@ public class OrderController {
     @PostMapping("/order/users/payments/{paymentMethod}")
     public ResponseEntity<OrderDTO> orderProducts(@PathVariable String paymentMethod, @RequestBody OrderRequestDTO orderRequestDTO) {
         String emailId = authUtil.getLoggedInUserEmail();
-        System.out.println("orderRequestDTO DATA: " + orderRequestDTO);
         OrderDTO order = orderService.placeOrder(
                 emailId,
                 orderRequestDTO.getAddressId(),

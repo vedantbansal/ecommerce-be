@@ -19,8 +19,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -52,7 +50,7 @@ public class ProductServiceImpl implements ProductService{
     }
 
     @Override
-    public ResponseEntity<ProductDTO> addProduct(ProductDTO productDTO, Long categoryId) {
+    public ProductDTO addProduct(ProductDTO productDTO, Long categoryId) {
         Category category = categoryRepository.findById(categoryId)
                 .orElseThrow(()-> new ResourceNotFoundException("Category", "categoryId", categoryId));
         int productCountFromDB = productRepository.countProductByNameAndCategory(productDTO.getProductName(), category.getCategoryName());
@@ -65,11 +63,11 @@ public class ProductServiceImpl implements ProductService{
         double specialPrice = (1-product.getDiscount()*0.01)*product.getPrice();
         product.setSpecialPrice(specialPrice);
         Product savedProduct = productRepository.save(product);
-        return new ResponseEntity<>(modelMapper.map(savedProduct, ProductDTO.class), HttpStatus.OK);
+        return modelMapper.map(savedProduct, ProductDTO.class);
     }
 
     @Override
-    public ResponseEntity<ProductResponse> getAllProducts(Integer pageNumber, Integer pageSize, String sortBy, String sortOrder) {
+    public ProductResponse getAllProducts(Integer pageNumber, Integer pageSize, String sortBy, String sortOrder) {
         Sort sortByAndOrder = sortOrder.equalsIgnoreCase("asc") ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
         Pageable pagedetails = PageRequest.of(pageNumber, pageSize, sortByAndOrder);
         Page<Product> productPage = productRepository.findAll(pagedetails);
@@ -80,11 +78,11 @@ public class ProductServiceImpl implements ProductService{
         ).toList();
         ProductResponse productResponse = modelMapper.map(productPage, ProductResponse.class);
         productResponse.setContent(productDTOList);
-        return new ResponseEntity<>(productResponse, HttpStatus.OK);
+        return productResponse;
     }
 
     @Override
-    public ResponseEntity<ProductResponse> getProductsByCategory(Integer pageNumber, Integer pageSize, Long categoryId) {
+    public ProductResponse getProductsByCategory(Integer pageNumber, Integer pageSize, Long categoryId) {
         Pageable pageDetails = PageRequest.of(pageNumber, pageSize);
         Category category = categoryRepository.findById(categoryId)
                 .orElseThrow(() -> new ResourceNotFoundException("Category", "categoryId", categoryId));
@@ -96,11 +94,11 @@ public class ProductServiceImpl implements ProductService{
         ).toList();
         ProductResponse productResponse = modelMapper.map(productPage, ProductResponse.class);
         productResponse.setContent(productDTOList);
-        return new ResponseEntity<>(productResponse, HttpStatus.OK);
+        return productResponse;
     }
 
     @Override
-    public ResponseEntity<ProductResponse> getProductsByKeyword(String keyword, Integer pageNumber, Integer pageSize) {
+    public ProductResponse getProductsByKeyword(String keyword, Integer pageNumber, Integer pageSize) {
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
         Page<Product> productPage = productRepository.searchProductByKeyword(keyword, pageable);
         List<Product> productList = productPage.getContent();
@@ -110,12 +108,12 @@ public class ProductServiceImpl implements ProductService{
         ).toList();
         ProductResponse productResponse = modelMapper.map(productPage, ProductResponse.class);
         productResponse.setContent(productDTOList);
-        return new ResponseEntity<>(productResponse, HttpStatus.OK);
+        return productResponse;
     }
 
     @Transactional
     @Override
-    public ResponseEntity<ProductDTO> updateProduct(ProductDTO productDTO, Long productId) {
+    public ProductDTO updateProduct(ProductDTO productDTO, Long productId) {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() ->new ResourceNotFoundException("Product","productId",productId));
         product.setProductName(productDTO.getProductName());
@@ -128,28 +126,28 @@ public class ProductServiceImpl implements ProductService{
         product.setSpecialPrice(specialPrice);
         updateProductPricesInCarts(productId, specialPrice, oldPrice);
         Product savedProduct = productRepository.save(product);
-        return new ResponseEntity<>(modelMapper.map(savedProduct, ProductDTO.class), HttpStatus.OK);
+        return modelMapper.map(savedProduct, ProductDTO.class);
     }
 
     @Transactional
     @Override
-    public ResponseEntity<ProductDTO> deleteProduct(Long productId) {
+    public ProductDTO deleteProduct(Long productId) {
         Product product = productRepository.findById(productId)
                 .orElseThrow(() ->new ResourceNotFoundException("Product","productId",productId));
         updateProductPricesInCarts(productId, 0, product.getSpecialPrice());
         product.getCartItems().clear();
         productRepository.delete(product);
-        return new ResponseEntity<>(modelMapper.map(product, ProductDTO.class), HttpStatus.OK);
+        return modelMapper.map(product, ProductDTO.class);
     }
 
     @Override
-    public ResponseEntity<ProductDTO> updateProductImage(Long productId, MultipartFile image){
+    public ProductDTO updateProductImage(Long productId, MultipartFile image){
         Product product = productRepository.findById(productId)
                 .orElseThrow(() -> new ResourceNotFoundException("Product", "productId", productId));
         String imagePath =  fileService.uploadImage(productDirPath, image);
         product.setImage(imagePath);
         Product savedProduct = productRepository.save(product);
-        return new ResponseEntity<>(modelMapper.map(savedProduct, ProductDTO.class), HttpStatus.OK);
+        return modelMapper.map(savedProduct, ProductDTO.class);
     }
 
     @Transactional

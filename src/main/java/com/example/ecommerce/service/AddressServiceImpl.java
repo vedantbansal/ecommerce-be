@@ -34,25 +34,23 @@ public class AddressServiceImpl implements AddressService{
     }
 
     @Override
-    public ResponseEntity<AddressDTO> createAddress(AddressDTO addressDTO) {
+    public AddressDTO createAddress(AddressDTO addressDTO) {
         User user = authUtils.getLoggedInUser();
         Address address = addressMapper.toAddress(addressDTO);
         address.setUser(user);
         Address savedAddress = addressRepository.save(address);
-        return ResponseEntity.ok(addressMapper.toAddressDTO(savedAddress));
+        return addressMapper.toAddressDTO(savedAddress);
     }
 
     @Override
-    public ResponseEntity<List<AddressDTO>> getUserAddresses() {
+    public List<AddressDTO> getUserAddresses() {
         User user = authUtils.getLoggedInUser();
         List<Address> addresses = addressRepository.findByUserId(user.getUserId());
-        List<AddressDTO> addressDTOS = addresses.stream().map(
-                address -> addressMapper.toAddressDTO(address)).toList();
-        return ResponseEntity.ok(addressDTOS);
+        return addresses.stream().map(addressMapper::toAddressDTO).toList();
     }
 
     @Override
-    public ResponseEntity<AddressDTO> updateUserAddress(Long addressId, AddressDTO addressDTO) {
+    public AddressDTO updateUserAddress(Long addressId, AddressDTO addressDTO) {
         User user = authUtils.getLoggedInUser();
         Address address = addressRepository.findByUserIdAndAddressId(user.getUserId(), addressId)
                 .orElseThrow(() -> new ResourceNotFoundException("Address", "addressId", addressId));
@@ -60,29 +58,27 @@ public class AddressServiceImpl implements AddressService{
         address.setUser(user);
         address.setAddressId(addressId);
         Address savedUser = addressRepository.save(address);
-        return ResponseEntity.ok(addressMapper.toAddressDTO(savedUser));
+        return addressMapper.toAddressDTO(savedUser);
     }
 
     @Override
-    public ResponseEntity<String> deleteUserAddress(Long addressId) {
-       User user = authUtils.getLoggedInUser();
-       Address address = addressRepository.findByUserIdAndAddressId(user.getUserId(), addressId)
-               .orElseThrow(() -> new ResourceNotFoundException("Address", "addressId", addressId));
-       ResponseEntity<String> result;
-       try{
-           user.getAddresses().removeIf(add -> Objects.equals(address.getAddressId(), add.getAddressId()));
-           userRepository.save(user);
-           result = ResponseEntity.ok("Successfully deleted address with Id: " + addressId);
-       } catch (Exception e) {
-            result = new ResponseEntity<>("Error occurred while deleting address " + e.getMessage(), HttpStatus.FORBIDDEN);
-       }
-       return result;
+    public boolean deleteUserAddress(Long addressId) {
+        User user = authUtils.getLoggedInUser();
+        Address address = addressRepository.findByUserIdAndAddressId(user.getUserId(), addressId)
+                .orElseThrow(() -> new ResourceNotFoundException("Address", "addressId", addressId));
+        try {
+            user.getAddresses().removeIf(add -> Objects.equals(address.getAddressId(), add.getAddressId()));
+            userRepository.save(user);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     @Override
-    public ResponseEntity<AddressDTO> getUserAddressesById(Long addressId) {
+    public AddressDTO getUserAddressesById(Long addressId) {
         Address address = addressRepository.findById(addressId)
                 .orElseThrow(() -> new ResourceNotFoundException("Address","addressId",addressId));
-        return ResponseEntity.ok(addressMapper.toAddressDTO(address));
+        return addressMapper.toAddressDTO(address);
     }
 }

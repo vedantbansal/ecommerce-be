@@ -10,8 +10,6 @@ import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -42,33 +40,30 @@ public class CategoryServiceImpl implements CategoryService{
     }
 
     @Override
-    public ResponseEntity<CategoryDTO> createCategory(CategoryDTO categoryDTO) {
+    public CategoryDTO createCategory(CategoryDTO categoryDTO) {
         Category category = modelMapper.map(categoryDTO, Category.class);
         Category categoryFromDB = categoryRepository.findByCategoryName(category.getCategoryName());
         if(categoryFromDB != null) throw new ApiException("Category already exists with name " + category.getCategoryName());
         Category savedCategory = categoryRepository.save(category);
-        CategoryDTO savedCategoryDto = modelMapper.map(savedCategory, CategoryDTO.class);
-        return new ResponseEntity<>(savedCategoryDto, HttpStatus.OK);
+        return modelMapper.map(savedCategory, CategoryDTO.class);
     }
 
     @Override
-    public ResponseEntity<CategoryDTO> updateCategory(Long categoryId, String newCategoryName) {
+    public CategoryDTO updateCategory(Long categoryId, String newCategoryName) {
         Category category = categoryRepository.findById(categoryId).orElse(null);
         if(category == null) throw new ResourceNotFoundException("Category", "categoryId", categoryId);
         Category categoryFromDB = categoryRepository.findByCategoryName(newCategoryName);
         if(categoryFromDB != null) throw new ApiException("Category already exists with name " + newCategoryName);
         category.setCategoryName(newCategoryName);
         Category savedCategory = categoryRepository.save(category);
-        CategoryDTO savedCategoryDTO = modelMapper.map(savedCategory, CategoryDTO.class);
-        return new ResponseEntity<>(savedCategoryDTO, HttpStatus.OK);
+        return modelMapper.map(savedCategory, CategoryDTO.class);
     }
 
     @Override
-    public ResponseEntity<CategoryDTO> deleteCategory(Long categoryId) {
+    public CategoryDTO deleteCategory(Long categoryId) {
         Category category = categoryRepository.findById(categoryId).orElse(null);
         if(category == null) throw new ResourceNotFoundException("Category", "categoryId", categoryId);
         categoryRepository.delete(category);
-        CategoryDTO deletedCategoryDTO = modelMapper.map(category, CategoryDTO.class);
-        return new ResponseEntity<>(deletedCategoryDTO, HttpStatus.OK);
+        return modelMapper.map(category, CategoryDTO.class);
     }
 }
